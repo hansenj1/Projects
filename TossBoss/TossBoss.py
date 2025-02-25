@@ -4,9 +4,10 @@ Main implementation for the TossBoss results manager. Uses data stored in Athlet
 Jack Hansen, Spring 2025
 
 """
-
+from datetime import datetime
 import matplotlib.pyplot as plt
 from Athlete import Athlete
+
 
 def graph_throws(athlete, event):
     """
@@ -22,10 +23,14 @@ def graph_throws(athlete, event):
         print(f"No data found for athlete {athlete.get_name()} in event {event}.")
         return
 
-    # Extract and sort data by date
-    dates, distances = zip(*sorted(event_data, key=lambda x: x[0]))
+    # Convert date strings to datetime for correct sorting
+    event_data = sorted(event_data, key=lambda x: datetime.strptime(x["date"], "%Y-%m-%d"))
 
-    # Plotting the data
+    # Extract dates and distances
+    dates = [x["date"] for x in event_data]
+    distances = [x["distance"] for x in event_data]
+
+    # Plot the data
     plt.figure(figsize=(10, 6))
     plt.plot(dates, distances, marker='o', label=f"{event} distances")
     plt.title(f"{athlete.get_name()}'s {event} Performance Over Time")
@@ -35,17 +40,17 @@ def graph_throws(athlete, event):
     plt.grid(True)
     plt.legend()
     plt.tight_layout()
-    plt.show()
+    plt.savefig("graph.png")
 
     # Calculate and display average improvement
     avg_improvements = athlete.average_improvement()
     if event in avg_improvements:
-        print(f"Average improvement for {event}: {avg_improvements[event]} meters")
+        print(f"Average improvement for {event}: {avg_improvements[event]:.2f} meters")
     else:
         print(f"No average improvement data available for {event}.")
-
 # Example usage
 if __name__ == "__main__":
-    athlete = Athlete("John Doe")
-    athlete.read_from_csv("athlete_data.csv")
-    graph_throws(athlete, "hammer")
+    ex = Athlete("Jack Hansen")
+    ex.read_from_csv("IWU_throws_athletes.csv")
+    ex.set_event("weight throw")
+    graph_throws(ex, "weight throw")
